@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tio Renshuu — 練習ハブ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #080c14;
+  --bg2:      #0d1220;
+  --bg3:      #131929;
+  --border:   #1e2d45;
+  --text:     #d4dff0;
+  --muted:    #5a7090;
+  --accent1:  #3b82f6;
+  --accent2:  #06b6d4;
+  --accent3:  #8b5cf6;
+  --accent4:  #10b981;
+  --accent5:  #f59e0b;
+  --accent6:  #ef4444;
+  --white:    #ffffff;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Syne', 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ── GRID BG ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* ── GLOW ORBS ── */
+.orb {
+  position: fixed; border-radius: 50%;
+  filter: blur(100px); pointer-events: none; z-index: 0;
+  animation: drift 18s ease-in-out infinite;
+}
+.orb1 { width: 600px; height: 600px; background: rgba(59,130,246,0.07); top: -200px; right: -100px; animation-delay: 0s; }
+.orb2 { width: 400px; height: 400px; background: rgba(139,92,246,0.06); bottom: -100px; left: -100px; animation-delay: -8s; }
+.orb3 { width: 300px; height: 300px; background: rgba(6,182,212,0.05); top: 40%; left: 40%; animation-delay: -4s; }
+
+@keyframes drift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%      { transform: translate(30px,-20px) scale(1.05); }
+  66%      { transform: translate(-20px,30px) scale(0.95); }
+}
+
+/* ── LAYOUT ── */
+.page { position: relative; z-index: 1; }
+
+/* ── HEADER ── */
+.header {
+  padding: 32px 32px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+
+.brand {
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.brand-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent1); opacity: 0.8;
+}
+
+.brand-name {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 800; letter-spacing: -1.5px;
+  color: var(--white); line-height: 1;
+}
+
+.brand-name .jp {
+  color: var(--accent1);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 700;
+}
+
+.brand-sub {
+  font-size: 0.78rem; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 4px;
+}
+
+/* ── STATUS PILL ── */
+.status-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 100px; padding: 8px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem; color: var(--muted);
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent4);
+  box-shadow: 0 0 8px var(--accent4);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ── HERO ── */
+.hero {
+  padding: 48px 32px 32px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.hero-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; color: var(--accent2); letter-spacing: 3px; text-transform: uppercase;
+}
+
+.hero-title {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700; letter-spacing: -0.5px;
+  color: var(--white); line-height: 1.2;
+  max-width: 600px;
+}
+
+.hero-title .highlight {
+  background: linear-gradient(135deg, var(--accent1), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.hero-desc {
+  font-size: 0.88rem; color: var(--muted);
+  max-width: 480px; line-height: 1.7;
+}
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: flex; gap: 24px; flex-wrap: wrap;
+  padding: 0 32px 40px;
+}
+.stat-item {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.stat-val {
+  font-size: 1.6rem; font-weight: 800; letter-spacing: -1px;
+  color: var(--white);
+}
+.stat-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px;
+}
+.stat-divider {
+  width: 1px; background: var(--border); align-self: stretch;
+}
+
+/* ── SECTION LABEL ── */
+.section-label {
+  padding: 0 32px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--muted);
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── CARDS GRID ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 0 32px 48px;
+}
+
+/* ── CARD ── */
+.card {
+  position: relative; overflow: hidden;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px;
+  text-decoration: none; color: inherit;
+  display: flex; flex-direction: column; gap: 16px;
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1),
+              border-color .2s, box-shadow .2s;
+  cursor: pointer;
+}
+
+.card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--card-glow, rgba(59,130,246,0.04));
+  opacity: 0; transition: opacity .3s;
+  border-radius: inherit;
+}
+
+.card:hover {
+  transform: translateY(-5px) scale(1.01);
+  border-color: var(--card-color, var(--accent1));
+  box-shadow: 0 20px 60px rgba(0,0,0,.4), 0 0 0 1px var(--card-color, var(--accent1));
+}
+
+.card:hover::before { opacity: 1; }
+
+/* Card accent line */
+.card-line {
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--card-color, var(--accent1)), transparent);
+  border-radius: 16px 16px 0 0;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .3s ease;
+}
+.card:hover .card-line { transform: scaleX(1); }
+
+/* Card number */
+.card-num {
+  position: absolute; top: 16px; right: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; color: var(--border);
+  letter-spacing: 1px;
+}
+
+/* Card icon */
+.card-icon {
+  width: 48px; height: 48px;
+  background: var(--card-bg, rgba(59,130,246,0.1));
+  border: 1px solid var(--card-border, rgba(59,130,246,0.2));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.card:hover .card-icon { transform: scale(1.15) rotate(-5deg); }
+
+.card-content { flex: 1; }
+
+.card-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--card-color, var(--accent1)); margin-bottom: 6px;
+}
+
+.card-title {
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.3px;
+  color: var(--white); margin-bottom: 8px; line-height: 1.2;
+}
+
+.card-desc {
+  font-size: 0.8rem; color: var(--muted); line-height: 1.6;
+}
+
+.card-tags {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
+}
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; padding: 2px 8px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  border-radius: 4px; color: var(--muted);
+}
+
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px;
+}
+
+.card-link-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem; color: var(--card-color, var(--accent1));
+  letter-spacing: 1px;
+}
+
+.card-arrow {
+  width: 28px; height: 28px;
+  background: var(--card-bg, rgba(59,130,246,0.1));
+  border: 1px solid var(--card-border, rgba(59,130,246,0.2));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; color: var(--card-color, var(--accent1));
+  transition: transform .2s, background .2s;
+}
+.card:hover .card-arrow {
+  transform: translate(3px, -3px);
+  background: var(--card-color, var(--accent1));
+  color: var(--bg);
+}
+
+/* ── FEATURED CARD (wide) ── */
+.card-featured {
+  grid-column: span 2;
+  flex-direction: row; align-items: center; gap: 24px;
+}
+.card-featured .card-content { flex: 1; }
+.card-featured .card-icon {
+  width: 64px; height: 64px; font-size: 1.8rem;
+  flex-shrink: 0; border-radius: 16px;
+}
+
+/* ── COMING SOON ── */
+.card-soon { opacity: 0.5; cursor: default; }
+.card-soon:hover { transform: none; box-shadow: none; border-color: var(--border); }
+.card-soon:hover::before { opacity: 0; }
+.soon-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 4px; color: var(--muted);
+}
+
+/* ── FOOTER ── */
+footer {
+  padding: 24px 32px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+footer p {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem; color: var(--muted);
+}
+.footer-jp {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.75rem; color: var(--muted);
+}
+
+/* ── ENTER ANIMATION ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.fade-up {
+  opacity: 0;
+  animation: fadeUp .5s ease forwards;
+}
+.d1{animation-delay:.05s} .d2{animation-delay:.1s} .d3{animation-delay:.15s}
+.d4{animation-delay:.2s}  .d5{animation-delay:.25s} .d6{animation-delay:.3s}
+.d7{animation-delay:.35s} .d8{animation-delay:.4s}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .header { padding: 20px 20px 0; }
+  .hero   { padding: 32px 20px 24px; }
+  .stats-row { padding: 0 20px 32px; gap: 16px; }
+  .section-label { padding: 0 20px 14px; }
+  .cards  { padding: 0 20px 40px; grid-template-columns: 1fr; gap: 12px; }
+  footer  { padding: 20px; }
+
+  .card-featured { grid-column: span 1; flex-direction: column; }
+  .stat-divider  { display: none; }
+
+  .brand-name { letter-spacing: -1px; }
+  .status-bar { font-size: 0.65rem; padding: 6px 12px; }
+}
+
+@media (max-width: 480px) {
+  .cards { grid-template-columns: 1fr; }
+  .card-featured { flex-direction: column; }
+  .hero-title { font-size: 1.3rem; }
+}
+
+@media (min-width: 1200px) {
+  .cards { grid-template-columns: repeat(3, 1fr); }
+  .card-featured { grid-column: span 2; }
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="header fade-up d1">
+    <div class="brand">
+      <div class="brand-tag">個人練習ハブ · Personal Hub</div>
+      <div class="brand-name">Tio <span class="jp">練習</span></div>
+      <div class="brand-sub">Bagus Satrio Nugroho · Nichiele Saitama · 2026</div>
+    </div>
+    <div class="status-bar">
+      <div class="status-dot"></div>
+      <span>Active · Koshigaya, Saitama</span>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero fade-up d2">
+    <div class="hero-label">ようこそ — Welcome</div>
+    <h1 class="hero-title">
+      Hub belajar pribadi untuk<br>
+      <span class="highlight">kehidupan & karir di Jepang</span>
+    </h1>
+    <p class="hero-desc">
+      Semua resource latihan bahasa, navigasi kota, dan informasi penting
+      tersedia di satu tempat. がんばれ！
+    </p>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-row fade-up d3">
+    <div class="stat-item">
+      <div class="stat-val">110+</div>
+      <div class="stat-lbl">Kosakata</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-val">N3</div>
+      <div class="stat-lbl">Target JLPT</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-val">IT</div>
+      <div class="stat-lbl">Bidang Kerja</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-val">2026</div>
+      <div class="stat-lbl">Tahun Mulai</div>
+    </div>
+  </div>
+
+  <!-- SECTION LABEL -->
+  <div class="section-label fade-up d4">
+    <span>MENU UTAMA</span>
+  </div>
+
+  <!-- CARDS -->
+  <div class="cards">
+
+    <!-- CARD 1: Business Word (FEATURED) -->
+    <a class="card card-featured fade-up d4"
+       style="--card-color:#3b82f6;--card-bg:rgba(59,130,246,0.08);--card-border:rgba(59,130,246,0.2);--card-glow:rgba(59,130,246,0.05)"
+       href="business.html">
+      <div class="card-line"></div>
+      <div class="card-icon">📘</div>
+      <div class="card-content">
+        <div class="card-label">Latihan · Business</div>
+        <div class="card-title">Kamus Bisnis Jepang</div>
+        <div class="card-desc">
+          Kosakata kerja, istilah kantor, IT & security terms. Lengkap dengan flashcard, bulk upload CSV/Excel, dan mode belajar interaktif.
+        </div>
+        <div class="card-tags">
+          <span class="tag">110+ kata</span>
+          <span class="tag">Flashcard</span>
+          <span class="tag">CSV Import</span>
+          <span class="tag">IT · HR · Finance</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-link-text">BUKA →</span>
+        <div class="card-arrow">↗</div>
+      </div>
+    </a>
+
+    <!-- CARD 2: Koshigaya Maps -->
+    <a class="card fade-up d5"
+       style="--card-color:#10b981;--card-bg:rgba(16,185,129,0.08);--card-border:rgba(16,185,129,0.2);--card-glow:rgba(16,185,129,0.05)"
+       href="koshigaya.html">
+      <div class="card-line"></div>
+      <div class="card-num">02</div>
+      <div class="card-icon">🗺️</div>
+      <div class="card-content">
+        <div class="card-label">Navigasi · Maps</div>
+        <div class="card-title">Koshigaya Guide</div>
+        <div class="card-desc">
+          Peta interaktif area Koshigaya, Saitama. Lokasi penting: kantor, supermarket, stasiun, rumah sakit, dan tempat makan.
+        </div>
+        <div class="card-tags">
+          <span class="tag">Koshigaya</span>
+          <span class="tag">Saitama</span>
+          <span class="tag">Tempat Penting</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-link-text">BUKA →</span>
+        <div class="card-arrow">↗</div>
+      </div>
+    </a>
+
+    <!-- CARD 3: Custom (placeholder) -->
+    <a class="card fade-up d6"
+       style="--card-color:#8b5cf6;--card-bg:rgba(139,92,246,0.08);--card-border:rgba(139,92,246,0.2);--card-glow:rgba(139,92,246,0.05)"
+       href="something.html">
+      <div class="card-line"></div>
+      <div class="card-num">03</div>
+      <div class="card-icon">⭐</div>
+      <div class="card-content">
+        <div class="card-label">Custom · 03</div>
+        <div class="card-title">Page Ketiga</div>
+        <div class="card-desc">
+          Slot untuk konten berikutnya. Edit judul, deskripsi, dan icon sesuai kebutuhan kamu.
+        </div>
+        <div class="card-tags">
+          <span class="tag">something.html</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-link-text">BUKA →</span>
+        <div class="card-arrow">↗</div>
+      </div>
+    </a>
+
+    <!-- CARD 4: Custom 2 (placeholder) -->
+    <a class="card fade-up d7"
+       style="--card-color:#f59e0b;--card-bg:rgba(245,158,11,0.08);--card-border:rgba(245,158,11,0.2);--card-glow:rgba(245,158,11,0.05)"
+       href="something_2.html">
+      <div class="card-line"></div>
+      <div class="card-num">04</div>
+      <div class="card-icon">🔧</div>
+      <div class="card-content">
+        <div class="card-label">Custom · 04</div>
+        <div class="card-title">Page Keempat</div>
+        <div class="card-desc">
+          Slot untuk konten berikutnya. Edit judul, deskripsi, dan icon sesuai kebutuhan kamu.
+        </div>
+        <div class="card-tags">
+          <span class="tag">something_2.html</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-link-text">BUKA →</span>
+        <div class="card-arrow">↗</div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="fade-up d8">
+    <p>© 2026 Tio Renshuu · バグス サトリオ ヌグロホ · Nichiele Saitama Factory</p>
+    <p class="footer-jp">毎日少しずつ — Sedikit demi sedikit setiap hari</p>
+  </footer>
+
+</div>
+</body>
+</html>

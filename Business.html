@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📘 Kamus Kerja Jepang — Bagus @ Nichiele</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg:#0f1117;--bg2:#181c27;--bg3:#1e2436;--border:#2a3050;
+  --text:#e8ecf4;--muted:#8892b0;--white:#ffffff;
+  --blue:#4e9af1;--green:#43d9a2;--orange:#ffb347;--red:#ff6b6b;
+  --purple:#b48ef7;--teal:#38ecdc;--yellow:#ffd166;--pink:#fd79a8;
+  --cat-jam:#4e9af1;--cat-cuti:#43d9a2;--cat-gaji:#ffb347;
+  --cat-aturan:#b48ef7;--cat-sanksi:#ff6b6b;--cat-benefit:#38ecdc;
+  --cat-soumu:#fd79a8;--cat-jinji:#a29bfe;--cat-it:#00cec9;
+  --cat-finance:#fdcb6e;--cat-custom:#ffd166;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0d1b3e 0%,#1a2a5e 50%,#0d1b3e 100%);border-bottom:1px solid var(--border);padding:18px 24px 14px;position:sticky;top:0;z-index:100}
+header h1{font-size:1.35rem;font-weight:700;color:var(--white)}
+header h1 span{color:var(--blue)}
+header p{font-size:0.75rem;color:var(--muted);margin-top:2px}
+
+/* STATS */
+.stats{display:flex;gap:14px;flex-wrap:wrap;padding:8px 24px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.stat{display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)}
+.stat b{color:var(--text);font-size:0.85rem}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 24px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:67px;z-index:99}
+.search-wrap{position:relative;flex:1;min-width:160px}
+.search-wrap input{width:100%;padding:7px 10px 7px 32px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.82rem;font-family:inherit;outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--blue)}
+.search-wrap .ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:0.8rem;color:var(--muted)}
+.filter-btns{display:flex;gap:5px;flex-wrap:wrap}
+.fbtn{padding:4px 10px;border-radius:16px;font-size:0.72rem;border:1px solid var(--border);background:var(--bg3);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.fbtn:hover{border-color:var(--blue);color:var(--blue)}
+.fbtn.active{color:var(--bg);font-weight:700;border-color:transparent}
+.mode-toggle{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:3px}
+.mtbtn{padding:5px 10px;border-radius:5px;font-size:0.72rem;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
+.mtbtn.active{background:var(--blue);color:var(--bg);font-weight:700}
+
+/* PANELS */
+.panel{margin:12px 24px 0;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.panel-toggle{width:100%;padding:11px 16px;background:none;border:none;color:var(--text);font-family:inherit;font-size:0.83rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;text-align:left}
+.panel-toggle .arr{transition:transform .2s;margin-left:auto;color:var(--muted);font-size:0.75rem}
+.panel-toggle.open .arr{transform:rotate(180deg)}
+.panel-body{display:none;padding:0 16px 16px}
+.panel-body.show{display:block}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.form-full{grid-template-columns:1fr}
+.finput{padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:0.82rem;outline:none;transition:border-color .2s;width:100%}
+.finput:focus{border-color:var(--blue)}
+select.finput option{background:var(--bg2)}
+.form-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.btn{padding:7px 16px;border-radius:8px;font-family:inherit;font-weight:700;font-size:0.8rem;cursor:pointer;border:1px solid;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--blue);color:var(--bg);border-color:transparent}
+.btn-primary:hover{opacity:.85}
+.btn-green{background:var(--green);color:var(--bg);border-color:transparent}
+.btn-green:not(:disabled):hover{opacity:.85}
+.btn-green:disabled{opacity:.4;cursor:not-allowed}
+.btn-outline{background:transparent}
+.btn-csv{border-color:var(--green);color:var(--green)}
+.btn-csv:hover{background:var(--green);color:var(--bg)}
+.btn-xlsx{border-color:var(--orange);color:var(--orange)}
+.btn-xlsx:hover{background:var(--orange);color:var(--bg)}
+.btn-export{border-color:var(--purple);color:var(--purple)}
+.btn-export:hover{background:var(--purple);color:var(--bg)}
+.btn-danger{border-color:var(--border);color:var(--muted)}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+
+/* DROPZONE */
+.dropzone{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;margin-top:10px}
+.dropzone:hover,.dropzone.drag{border-color:var(--blue);background:rgba(78,154,241,0.05)}
+.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dropzone-icon{font-size:1.8rem;margin-bottom:6px}
+.dropzone-text{font-size:0.82rem;color:var(--muted)}
+.dropzone-text b{color:var(--blue)}
+.dropzone-sub{font-size:0.7rem;color:var(--border);margin-top:3px}
+
+/* PREVIEW */
+.preview-wrap{margin-top:12px;display:none;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.preview-wrap.show{display:block}
+.preview-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:var(--bg3);font-size:0.76rem;font-weight:600}
+.preview-hdr span{color:var(--muted)}
+.preview-scroll{max-height:240px;overflow-y:auto}
+.ptbl{width:100%;border-collapse:collapse;font-size:0.76rem}
+.ptbl th{padding:6px 10px;background:var(--bg3);color:var(--muted);text-align:left;font-weight:700;font-size:0.68rem;text-transform:uppercase;border-bottom:1px solid var(--border);position:sticky;top:0}
+.ptbl td{padding:5px 10px;border-bottom:1px solid var(--border)}
+.ptbl tr:last-child td{border-bottom:none}
+.ptbl tr.row-err td{background:rgba(255,107,107,0.07)}
+.ok{color:var(--green)}.err{color:var(--red);font-size:0.68rem}
+
+/* BULK NOTE */
+.bulk-note{font-size:0.73rem;color:var(--muted);margin-top:10px;line-height:1.6;background:var(--bg3);border-radius:8px;padding:9px 12px}
+.bulk-note code{background:var(--bg);color:var(--orange);padding:1px 4px;border-radius:3px;font-size:0.7rem}
+
+/* MAIN */
+main{padding:0 24px 40px}
+.category-block{margin-top:18px}
+.cat-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;user-select:none;cursor:pointer}
+.cat-badge{padding:3px 10px;border-radius:16px;font-size:0.75rem;font-weight:700;color:var(--bg)}
+.cat-count{font-size:0.72rem;color:var(--muted);background:var(--bg3);border:1px solid var(--border);padding:2px 7px;border-radius:8px}
+.cat-collapse{margin-left:auto;color:var(--muted);font-size:0.72rem}
+.vocab-table{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.vocab-table thead th{padding:8px 10px;font-size:0.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);text-align:left;background:var(--bg3);border-bottom:1px solid var(--border)}
+.vocab-table tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.vocab-table tbody tr:last-child{border-bottom:none}
+.vocab-table tbody tr:hover{background:var(--bg3)}
+.vocab-table td{padding:9px 10px;vertical-align:middle}
+.td-kanji{font-size:1.05rem;font-weight:700;font-family:'Noto Sans JP',sans-serif}
+.td-furi{font-size:0.68rem;color:var(--muted);font-family:'Noto Sans JP',sans-serif;margin-top:1px}
+.td-arti{font-size:0.8rem;font-weight:600}
+.td-jp{font-size:0.77rem;font-family:'Noto Sans JP',sans-serif}
+.td-id{font-size:0.71rem;color:var(--muted);margin-top:2px;font-style:italic}
+.del-btn{background:none;border:none;color:var(--border);cursor:pointer;font-size:0.85rem;padding:3px;border-radius:4px;transition:color .15s}
+.del-btn:hover{color:var(--red)}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:18px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;transition:transform .15s,border-color .15s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
+.card:hover{transform:translateY(-2px);border-color:var(--muted)}
+.card-cat{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.9px;margin-bottom:8px}
+.card-kanji{font-size:1.5rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;line-height:1.1;margin-bottom:2px}
+.card-furi{font-size:0.72rem;color:var(--muted);margin-bottom:7px;font-family:'Noto Sans JP',sans-serif}
+.card-arti{font-size:0.79rem;font-weight:600;padding:3px 8px;border-radius:5px;display:inline-block;margin-bottom:8px;background:rgba(255,255,255,0.06)}
+.card-jp{font-size:0.72rem;font-family:'Noto Sans JP',sans-serif;line-height:1.5}
+.card-id{font-size:0.69rem;color:var(--muted);font-style:italic;margin-top:2px}
+.card .del-btn{position:absolute;top:9px;right:9px}
+
+/* FLASHCARD */
+.flash-wrap{display:flex;flex-direction:column;align-items:center;padding:24px 0;min-height:380px}
+.flash-top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.flash-info{color:var(--muted);font-size:0.78rem}
+.flash-shuffle{padding:5px 12px;border-radius:20px;font-size:0.75rem;border:1px solid var(--border);background:var(--bg3);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.flash-shuffle:hover,.flash-shuffle.on{border-color:var(--yellow);color:var(--yellow)}
+.flash-shuffle.on{background:rgba(253,209,102,0.1)}
+.flashcard{width:100%;max-width:480px;height:260px;perspective:1000px;cursor:pointer;margin-bottom:18px}
+.flash-inner{width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d;position:relative}
+.flashcard.flipped .flash-inner{transform:rotateY(180deg)}
+.flash-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;background:var(--bg2);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center}
+.flash-back{transform:rotateY(180deg)}
+.flash-kanji{font-size:2.8rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;margin-bottom:7px}
+.flash-furi{font-size:0.85rem;color:var(--muted)}
+.flash-hint{font-size:0.7rem;color:var(--border);margin-top:16px}
+.flash-arti{font-size:1.3rem;font-weight:700;margin-bottom:10px}
+.flash-cat{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.9px;margin-bottom:7px}
+.flash-jp{font-size:0.8rem;font-family:'Noto Sans JP',sans-serif;line-height:1.55}
+.flash-id{font-size:0.74rem;color:var(--muted);font-style:italic}
+.flash-nav{display:flex;gap:10px;align-items:center}
+.flash-btn{padding:7px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:0.8rem;cursor:pointer;transition:all .15s}
+.flash-btn:hover{border-color:var(--blue);color:var(--blue)}
+.flash-btn.primary{background:var(--blue);color:var(--bg);font-weight:700;border-color:transparent}
+.flash-btn.primary:hover{opacity:.85}
+.flash-counter{font-size:0.8rem;color:var(--muted);min-width:55px;text-align:center}
+
+/* MISC */
+.empty{text-align:center;padding:36px;color:var(--muted);font-size:0.88rem}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--green);color:var(--bg);padding:9px 16px;border-radius:8px;font-weight:700;font-size:0.8rem;transform:translateY(70px);opacity:0;transition:all .3s;z-index:999}
+.toast.show{transform:translateY(0);opacity:1}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📘 Kamus Kerja Jepang <span>— Nichiele</span></h1>
+  <p>日本エレベーター製造株式会社 · Saitama Factory · Bagus Satrio Nugroho · 2026</p>
+</header>
+
+<div class="stats" id="statsBar"></div>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="ico">🔍</span>
+    <input type="text" id="searchInput" placeholder="Cari kanji, arti, furigana...">
+  </div>
+  <div class="filter-btns" id="filterBtns"></div>
+  <div class="mode-toggle">
+    <button class="mtbtn active" onclick="setMode('table')" id="m-table">📋 Tabel</button>
+    <button class="mtbtn" onclick="setMode('card')" id="m-card">🃏 Card</button>
+    <button class="mtbtn" onclick="setMode('flash')" id="m-flash">⚡ Flash</button>
+  </div>
+</div>
+
+<!-- ADD SINGLE -->
+<div class="panel" id="panelAdd">
+  <button class="panel-toggle" id="togAdd" onclick="togglePanel('Add')">
+    ➕ Tambah Kosakata Manual <span class="arr">▼</span>
+  </button>
+  <div class="panel-body" id="bodyAdd">
+    <div class="form-grid">
+      <input class="finput" id="f-kanji" placeholder="漢字 / カタカナ">
+      <input class="finput" id="f-furi"  placeholder="読み方 (furigana)">
+    </div>
+    <div class="form-grid">
+      <input class="finput" id="f-arti" placeholder="Arti (Indonesia) *">
+      <select class="finput" id="f-cat">
+        <option value="">Pilih Kategori *</option>
+        <option value="jam">🕐 Jam Kerja & Absensi</option>
+        <option value="cuti">🏖️ Cuti & Libur</option>
+        <option value="gaji">💴 Gaji & Tunjangan</option>
+        <option value="aturan">📋 Aturan & Administrasi</option>
+        <option value="sanksi">⚖️ Sanksi & Disiplin</option>
+        <option value="benefit">🎁 Benefit & Kesejahteraan</option>
+        <option value="soumu">🏢 総務 General Affairs</option>
+        <option value="jinji">👥 人事 HR</option>
+        <option value="it">💻 IT & Security</option>
+        <option value="finance">💰 Finance & Accounting</option>
+        <option value="custom">⭐ Kosakata Tambahan</option>
+      </select>
+    </div>
+    <div class="form-grid form-full">
+      <input class="finput" id="f-jp" placeholder="Contoh kalimat Jepang (opsional)">
+    </div>
+    <div class="form-grid form-full">
+      <input class="finput" id="f-id" placeholder="Terjemahan contoh kalimat (opsional)">
+    </div>
+    <div class="form-row">
+      <button class="btn btn-primary" onclick="addVocab()">✓ Tambahkan</button>
+      <span id="formMsg" style="font-size:0.75rem;color:var(--muted)"></span>
+    </div>
+  </div>
+</div>
+
+<!-- BULK UPLOAD -->
+<div class="panel" id="panelBulk">
+  <button class="panel-toggle" id="togBulk" onclick="togglePanel('Bulk')">
+    📤 Bulk Upload CSV / Excel <span class="arr">▼</span>
+  </button>
+  <div class="panel-body" id="bodyBulk">
+
+    <!-- Download template buttons -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-outline btn-csv" onclick="downloadTemplate('csv')">⬇ Template CSV</button>
+      <button class="btn btn-outline btn-xlsx" onclick="downloadTemplate('xlsx')">⬇ Template Excel</button>
+      <button class="btn btn-outline btn-export" onclick="exportData('csv')">📤 Export Data CSV</button>
+      <button class="btn btn-outline btn-export" onclick="exportData('xlsx')">📤 Export Data Excel</button>
+    </div>
+
+    <!-- Dropzone -->
+    <div class="dropzone" id="dropzone"
+      ondragover="ev.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handleDrop(event)">
+      <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFile(this.files[0])">
+      <div class="dropzone-icon">📁</div>
+      <div class="dropzone-text">Drag & drop file di sini, atau <b>klik untuk pilih file</b></div>
+      <div class="dropzone-sub">Support: .csv · .xlsx · .xls</div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-wrap" id="previewWrap">
+      <div class="preview-hdr">
+        <span>Preview Import</span>
+        <span id="previewCount"></span>
+      </div>
+      <div class="preview-scroll">
+        <table class="ptbl">
+          <thead>
+            <tr>
+              <th>#</th><th>漢字</th><th>Furigana</th>
+              <th>Arti</th><th>Kategori</th><th>Contoh JP</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="form-row" id="importActions" style="display:none">
+      <button class="btn btn-green" id="btnImport" onclick="importRows()">✓ Import Semua yang Valid</button>
+      <button class="btn btn-outline btn-danger" onclick="cancelPreview()">✕ Batal</button>
+      <span id="importMsg" style="font-size:0.75rem;color:var(--muted)"></span>
+    </div>
+
+    <div class="bulk-note">
+      <b>Format kolom CSV/Excel:</b><br>
+      <code>kanji</code> · <code>furigana</code> · <code>arti</code> · <code>kategori</code> · <code>contoh_jp</code> · <code>contoh_id</code><br><br>
+      <b>Nilai kategori valid:</b>
+      <code>jam</code> <code>cuti</code> <code>gaji</code> <code>aturan</code> <code>sanksi</code>
+      <code>benefit</code> <code>soumu</code> <code>jinji</code> <code>it</code> <code>finance</code> <code>custom</code><br><br>
+      Kolom <code>furigana</code>, <code>contoh_jp</code>, <code>contoh_id</code> boleh kosong.
+      Kata yang sudah ada (kanji sama) akan dilewati otomatis.
+    </div>
+  </div>
+</div>
+
+<main id="mainContent"></main>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CATEGORIES ──
+const CATS = {
+  jam:     {label:'🕐 Jam Kerja & Absensi',  color:'var(--cat-jam)'},
+  cuti:    {label:'🏖️ Cuti & Libur',          color:'var(--cat-cuti)'},
+  gaji:    {label:'💴 Gaji & Tunjangan',       color:'var(--cat-gaji)'},
+  aturan:  {label:'📋 Aturan & Administrasi',  color:'var(--cat-aturan)'},
+  sanksi:  {label:'⚖️ Sanksi & Disiplin',      color:'var(--cat-sanksi)'},
+  benefit: {label:'🎁 Benefit & Kesejahteraan',color:'var(--cat-benefit)'},
+  soumu:   {label:'🏢 総務 General Affairs',   color:'var(--cat-soumu)'},
+  jinji:   {label:'👥 人事 HR',               color:'var(--cat-jinji)'},
+  it:      {label:'💻 IT & Security',          color:'var(--cat-it)'},
+  finance: {label:'💰 Finance & Accounting',   color:'var(--cat-finance)'},
+  custom:  {label:'⭐ Kosakata Tambahan',       color:'var(--cat-custom)'},
+};
+
+const VALID_CATS = Object.keys(CATS);
+
+// ── DATA ──
+const INITIAL = [
+// JAM
+{id:1,cat:'jam',kanji:'就業時間',furi:'しゅうぎょうじかん',arti:'Jam kerja resmi',jp:'就業時間は8時45分〜17時30分です。',id_:'Jam kerja pukul 08:45–17:30.'},
+{id:2,cat:'jam',kanji:'始業時刻',furi:'しぎょうじこく',arti:'Waktu mulai kerja',jp:'始業時刻は午前8時45分です。',id_:'Waktu mulai kerja adalah 08:45.'},
+{id:3,cat:'jam',kanji:'終業時刻',furi:'しゅうぎょうじこく',arti:'Waktu selesai kerja',jp:'終業時刻は午後5時30分です。',id_:'Waktu selesai kerja adalah 17:30.'},
+{id:4,cat:'jam',kanji:'休憩時間',furi:'きゅうけいじかん',arti:'Waktu istirahat',jp:'昼の休憩時間は50分です。',id_:'Istirahat siang 50 menit.'},
+{id:5,cat:'jam',kanji:'遅刻',furi:'ちこく',arti:'Terlambat',jp:'遅刻した場合は所属長に報告してください。',id_:'Jika terlambat, laporkan ke atasan.'},
+{id:6,cat:'jam',kanji:'早退',furi:'そうたい',arti:'Pulang lebih awal',jp:'体調不良で早退したいのですが。',id_:'Ingin pulang lebih awal karena tidak enak badan.'},
+{id:7,cat:'jam',kanji:'欠勤',furi:'けっきん',arti:'Absen / tidak masuk',jp:'欠勤する場合は事前に連絡してください。',id_:'Jika absen, harap hubungi sebelumnya.'},
+{id:8,cat:'jam',kanji:'電車遅延',furi:'でんしゃちえん',arti:'Gangguan kereta',jp:'電車遅延による遅刻は令和8年から罰則なし。',id_:'Telat karena kereta tidak kena sanksi sejak 2026.'},
+{id:9,cat:'jam',kanji:'残業',furi:'ざんぎょう',arti:'Lembur',jp:'今日は残業があります。',id_:'Hari ini ada lembur.'},
+{id:10,cat:'jam',kanji:'時間外労働',furi:'じかんがいろうどう',arti:'Kerja di luar jam resmi',jp:'時間外労働は上司の承認が必要です。',id_:'Lembur perlu persetujuan atasan.'},
+// CUTI
+{id:11,cat:'cuti',kanji:'有給休暇',furi:'ゆうきゅうきゅうか',arti:'Cuti berbayar',jp:'6ヶ月後に有給休暇が10日付与されます。',id_:'Setelah 6 bulan dapat 10 hari cuti berbayar.'},
+{id:12,cat:'cuti',kanji:'半日休暇',furi:'はんにちきゅうか',arti:'Cuti setengah hari',jp:'午前中に半日休暇を取りたいです。',id_:'Mau ambil cuti setengah hari pagi ini.'},
+{id:13,cat:'cuti',kanji:'夏期休暇',furi:'なつきゅうか',arti:'Libur musim panas',jp:'夏期休暇は3日間あります。',id_:'Libur musim panas ada 3 hari.'},
+{id:14,cat:'cuti',kanji:'年末年始',furi:'ねんまつねんし',arti:'Libur tahun baru',jp:'年末年始は12/30〜1/4です。',id_:'Libur tahun baru 30 Des – 4 Jan.'},
+{id:15,cat:'cuti',kanji:'祝日',furi:'しゅくじつ',arti:'Hari libur nasional',jp:'祝日は法定休日です。',id_:'Hari libur nasional adalah libur resmi.'},
+{id:16,cat:'cuti',kanji:'振替休日',furi:'ふりかえきゅうじつ',arti:'Libur pengganti',jp:'祝日が日曜の場合、翌月曜が振替休日です。',id_:'Libur nasional hari Minggu → gantinya Senin.'},
+{id:17,cat:'cuti',kanji:'慰労休暇',furi:'いろうきゅうか',arti:'Cuti penghargaan (1hr/th)',jp:'慰労休暇は5月の連休中に取得します。',id_:'Diambil dalam liburan Golden Week Mei.'},
+{id:18,cat:'cuti',kanji:'育児休業',furi:'いくじきゅうぎょう',arti:'Cuti pengasuhan anak',jp:'育児休業を申請したいのですが。',id_:'Saya ingin mengajukan cuti pengasuhan anak.'},
+// GAJI
+{id:19,cat:'gaji',kanji:'基本給',furi:'きほんきゅう',arti:'Gaji pokok',jp:'基本給は215,000円です。',id_:'Gaji pokok ¥215,000.'},
+{id:20,cat:'gaji',kanji:'住宅手当',furi:'じゅうたくてあて',arti:'Tunjangan perumahan',jp:'単身者の住宅手当は13,000円です。',id_:'Tunjangan rumah single ¥13,000.'},
+{id:21,cat:'gaji',kanji:'家族手当',furi:'かぞくてあて',arti:'Tunjangan keluarga',jp:'妻の家族手当は月10,500円です。',id_:'Tunjangan keluarga istri ¥10,500/bulan.'},
+{id:22,cat:'gaji',kanji:'通勤手当',furi:'つうきんてあて',arti:'Tunjangan transportasi',jp:'通勤手当は実費全額支給です。',id_:'Transport diganti penuh sesuai aktual.'},
+{id:23,cat:'gaji',kanji:'時間外手当',furi:'じかんがいてあて',arti:'Tunjangan lembur',jp:'時間外手当は25%増しです。',id_:'Lembur biasa +25%.'},
+{id:24,cat:'gaji',kanji:'深夜手当',furi:'しんやてあて',arti:'Tunjangan lembur malam',jp:'深夜勤務は50%増しの手当が出ます。',id_:'Lembur malam +50%.'},
+{id:25,cat:'gaji',kanji:'賞与',furi:'しょうよ',arti:'Bonus',jp:'賞与は7月と12月に支給されます。',id_:'Bonus diberikan Juli & Desember.'},
+{id:26,cat:'gaji',kanji:'扶養控除',furi:'ふようこうじょ',arti:'Potongan pajak tanggungan',jp:'扶養控除で税金が安くなります。',id_:'Tanggungan keluarga → pajak lebih kecil.'},
+{id:27,cat:'gaji',kanji:'給与明細',furi:'きゅうよめいさい',arti:'Slip gaji',jp:'毎月給与明細を確認してください。',id_:'Cek slip gaji setiap bulan.'},
+// ATURAN
+{id:28,cat:'aturan',kanji:'就業規則',furi:'しゅうぎょうきそく',arti:'Peraturan kerja perusahaan',jp:'就業規則に従って行動してください。',id_:'Bertindaklah sesuai peraturan kerja.'},
+{id:29,cat:'aturan',kanji:'試用期間',furi:'しようきかん',arti:'Masa percobaan (probation)',jp:'試用期間は入社後3ヶ月です。',id_:'Probation 3 bulan setelah masuk kerja.'},
+{id:30,cat:'aturan',kanji:'転勤',furi:'てんきん',arti:'Mutasi / pindah lokasi',jp:'会社の都合で転勤を命じることがあります。',id_:'Perusahaan bisa perintahkan mutasi.'},
+{id:31,cat:'aturan',kanji:'出張',furi:'しゅっちょう',arti:'Perjalanan dinas',jp:'来週、東京に出張があります。',id_:'Minggu depan ada dinas ke Tokyo.'},
+{id:32,cat:'aturan',kanji:'所属長',furi:'しょぞくちょう',arti:'Atasan langsung',jp:'休む場合は所属長に連絡してください。',id_:'Kalau tidak masuk, hubungi atasan.'},
+{id:33,cat:'aturan',kanji:'届け出',furi:'とどけで',arti:'Laporan / pengajuan resmi',jp:'遅刻の場合は届け出が必要です。',id_:'Terlambat perlu buat laporan resmi.'},
+{id:34,cat:'aturan',kanji:'扶養家族',furi:'ふようかぞく',arti:'Anggota keluarga tanggungan',jp:'妻と子供を扶養家族に登録します。',id_:'Mendaftarkan istri dan anak sebagai tanggungan.'},
+{id:35,cat:'aturan',kanji:'タイムカード',furi:'たいむかーど',arti:'Kartu absensi',jp:'タイムカードを押し忘れないでください。',id_:'Jangan lupa stamp kartu absensi.'},
+// SANKSI
+{id:36,cat:'sanksi',kanji:'懲戒',furi:'ちょうかい',arti:'Sanksi / hukuman disiplin',jp:'懲戒処分を受けることがあります。',id_:'Bisa dikenakan sanksi disiplin.'},
+{id:37,cat:'sanksi',kanji:'譴責',furi:'けんせき',arti:'Teguran tertulis',jp:'初回違反は譴責処分となります。',id_:'Pelanggaran pertama → teguran tertulis.'},
+{id:38,cat:'sanksi',kanji:'減給',furi:'げんきゅう',arti:'Potong gaji',jp:'無断欠勤が続くと減給になります。',id_:'Absen tanpa izin terus → kena potong gaji.'},
+{id:39,cat:'sanksi',kanji:'出勤停止',furi:'しゅっきんていし',arti:'Skorsing',jp:'重大な違反は出勤停止処分です。',id_:'Pelanggaran berat → skorsing.'},
+{id:40,cat:'sanksi',kanji:'懲戒解雇',furi:'ちょうかいかいこ',arti:'Pecat langsung tanpa pesangon',jp:'懲戒解雇は最も重い処分です。',id_:'Pecat langsung adalah sanksi terberat.'},
+{id:41,cat:'sanksi',kanji:'無断欠勤',furi:'むだんけっきん',arti:'Absen tanpa izin',jp:'無断欠勤14日以上は懲戒事由です。',id_:'Absen tanpa izin 14 hari+ = alasan sanksi berat.'},
+{id:42,cat:'sanksi',kanji:'機密事項',furi:'きみつじこう',arti:'Informasi rahasia perusahaan',jp:'機密事項を外部に漏らしてはいけません。',id_:'Rahasia perusahaan tidak boleh bocor ke luar.'},
+// BENEFIT
+{id:43,cat:'benefit',kanji:'退職金',furi:'たいしょくきん',arti:'Pesangon / uang pensiun',jp:'10年勤続で退職金が増えます。',id_:'Pesangon makin besar setelah 10 tahun kerja.'},
+{id:44,cat:'benefit',kanji:'出産祝金',furi:'しゅっさんいわいきん',arti:'Bonus kelahiran anak',jp:'出産祝金は30,000円と有給1日です。',id_:'Bonus kelahiran ¥30,000 + 1 hari cuti.'},
+{id:45,cat:'benefit',kanji:'結婚祝金',furi:'けっこんいわいきん',arti:'Bonus pernikahan',jp:'勤続1年以上で結婚祝金が出ます。',id_:'Bonus nikah untuk karyawan 1 tahun+.'},
+{id:46,cat:'benefit',kanji:'健康保険',furi:'けんこうほけん',arti:'Asuransi kesehatan',jp:'健康保険は家族も適用されます。',id_:'Asuransi kesehatan berlaku untuk keluarga juga.'},
+{id:47,cat:'benefit',kanji:'厚生年金',furi:'こうせいねんきん',arti:'Asuransi pensiun karyawan',jp:'毎月厚生年金が給与から引かれます。',id_:'Premi pensiun dipotong gaji setiap bulan.'},
+{id:48,cat:'benefit',kanji:'雇用保険',furi:'こようほけん',arti:'Asuransi ketenagakerjaan',jp:'雇用保険は失業時に役立ちます。',id_:'Berguna saat tidak bekerja/di-PHK.'},
+{id:49,cat:'benefit',kanji:'児童手当',furi:'じどうてあて',arti:'Tunjangan anak (pemerintah)',jp:'0〜2歳は月15,000円の児童手当があります。',id_:'Anak 0–2 tahun dapat ¥15,000/bulan dari pemerintah.'},
+// SOUMU
+{id:50,cat:'soumu',kanji:'総務',furi:'そうむ',arti:'General Affairs',jp:'総務部に書類を提出してください。',id_:'Silakan serahkan dokumen ke bagian GA.'},
+{id:51,cat:'soumu',kanji:'取締役会',furi:'とりしまりやくかい',arti:'Rapat direksi / board meeting',jp:'来週取締役会があります。',id_:'Minggu depan ada rapat direksi.'},
+{id:52,cat:'soumu',kanji:'株主総会',furi:'かぶぬしそうかい',arti:'Rapat pemegang saham',jp:'株主総会は年1回開かれます。',id_:'Rapat pemegang saham diadakan setahun sekali.'},
+{id:53,cat:'soumu',kanji:'契約書',furi:'けいやくしょ',arti:'Dokumen kontrak',jp:'契約書にサインしてください。',id_:'Tolong tandatangani kontrak.'},
+{id:54,cat:'soumu',kanji:'社内文書管理',furi:'しゃないぶんしょかんり',arti:'Pengelolaan dokumen internal',jp:'社内文書管理システムを使ってください。',id_:'Gunakan sistem manajemen dokumen internal.'},
+{id:55,cat:'soumu',kanji:'備品管理',furi:'びひんかんり',arti:'Manajemen inventaris kantor',jp:'備品管理台帳を更新してください。',id_:'Tolong update daftar inventaris kantor.'},
+{id:56,cat:'soumu',kanji:'安全衛生',furi:'あんぜんえいせい',arti:'Keselamatan & kesehatan kerja',jp:'安全衛生委員会が月1回開かれます。',id_:'Komite K3 diadakan sebulan sekali.'},
+{id:57,cat:'soumu',kanji:'来客対応',furi:'らいきゃくたいおう',arti:'Menangani tamu kantor',jp:'来客対応はフロントで行います。',id_:'Pelayanan tamu dilakukan di resepsionis.'},
+{id:58,cat:'soumu',kanji:'行事企画',furi:'ぎょうじきかく',arti:'Perencanaan acara perusahaan',jp:'忘年会の行事企画を担当しています。',id_:'Saya bertanggung jawab merencanakan acara akhir tahun.'},
+{id:59,cat:'soumu',kanji:'社内広報',furi:'しゃないこうほう',arti:'Komunikasi internal perusahaan',jp:'社内広報誌を毎月発行しています。',id_:'Newsletter internal diterbitkan setiap bulan.'},
+// JINJI
+{id:60,cat:'jinji',kanji:'人事',furi:'じんじ',arti:'Human Resources / SDM',jp:'人事部に相談してください。',id_:'Silakan konsultasikan ke bagian HR.'},
+{id:61,cat:'jinji',kanji:'採用',furi:'さいよう',arti:'Rekrutmen / hiring',jp:'新卒採用は毎年4月です。',id_:'Rekrutmen fresh graduate setiap April.'},
+{id:62,cat:'jinji',kanji:'面接',furi:'めんせつ',arti:'Wawancara kerja',jp:'面接は来週の月曜日です。',id_:'Wawancara adalah hari Senin minggu depan.'},
+{id:63,cat:'jinji',kanji:'入社手続き',furi:'にゅうしゃてつづき',arti:'Proses onboarding masuk kerja',jp:'入社手続きで必要な書類を提出してください。',id_:'Serahkan dokumen yang diperlukan untuk onboarding.'},
+{id:64,cat:'jinji',kanji:'勤怠管理',furi:'きんたいかんり',arti:'Manajemen absensi',jp:'勤怠管理システムにログインしてください。',id_:'Login ke sistem manajemen absensi.'},
+{id:65,cat:'jinji',kanji:'福利厚生',furi:'ふくりこうせい',arti:'Benefit / tunjangan karyawan',jp:'福利厚生制度を確認してください。',id_:'Cek program benefit karyawan.'},
+{id:66,cat:'jinji',kanji:'評価',furi:'ひょうか',arti:'Evaluasi / performance review',jp:'半期ごとに評価があります。',id_:'Ada evaluasi setiap semester.'},
+{id:67,cat:'jinji',kanji:'昇給',furi:'しょうきゅう',arti:'Kenaikan gaji',jp:'4月に昇給があります。',id_:'Kenaikan gaji ada di bulan April.'},
+{id:68,cat:'jinji',kanji:'昇格',furi:'しょうかく',arti:'Promosi jabatan',jp:'今年昇格できるように頑張ります。',id_:'Saya akan bekerja keras agar bisa promosi tahun ini.'},
+{id:69,cat:'jinji',kanji:'異動',furi:'いどう',arti:'Mutasi / transfer',jp:'来月から別の部署に異動します。',id_:'Bulan depan pindah ke departemen lain.'},
+{id:70,cat:'jinji',kanji:'研修',furi:'けんしゅう',arti:'Pelatihan / training',jp:'新入社員研修は1週間あります。',id_:'Pelatihan karyawan baru selama 1 minggu.'},
+{id:71,cat:'jinji',kanji:'組織改善',furi:'そしきかいぜん',arti:'Perbaikan organisasi',jp:'組織改善プロジェクトに参加しています。',id_:'Saya terlibat dalam proyek perbaikan organisasi.'},
+// IT
+{id:72,cat:'it',kanji:'情報セキュリティ',furi:'じょうほうせきゅりてぃ',arti:'Keamanan informasi',jp:'情報セキュリティ対策を強化します。',id_:'Kami memperkuat langkah-langkah keamanan informasi.'},
+{id:73,cat:'it',kanji:'インシデント対応',furi:'いんしでんとたいおう',arti:'Incident response',jp:'セキュリティインシデントに迅速に対応します。',id_:'Merespons insiden keamanan dengan cepat.'},
+{id:74,cat:'it',kanji:'情報資産',furi:'じょうほうしさん',arti:'Aset informasi',jp:'情報資産の管理台帳を作成します。',id_:'Membuat daftar inventaris aset informasi.'},
+{id:75,cat:'it',kanji:'セキュリティ教育',furi:'せきゅりてぃきょういく',arti:'Security awareness training',jp:'社員向けセキュリティ教育を実施します。',id_:'Melaksanakan training security awareness untuk karyawan.'},
+{id:76,cat:'it',kanji:'システム運用',furi:'しすてむうんよう',arti:'Operasional sistem IT',jp:'システム運用は24時間対応です。',id_:'Operasional sistem IT tersedia 24 jam.'},
+{id:77,cat:'it',kanji:'システム導入',furi:'しすてむどうにゅう',arti:'Implementasi sistem',jp:'新しいシステム導入を進めています。',id_:'Sedang melanjutkan implementasi sistem baru.'},
+{id:78,cat:'it',kanji:'システム保守',furi:'しすてむほしゅ',arti:'Maintenance sistem',jp:'定期的なシステム保守を行います。',id_:'Melakukan maintenance sistem secara berkala.'},
+{id:79,cat:'it',kanji:'ネットワーク基盤',furi:'ねっとわーくきばん',arti:'Infrastruktur jaringan',jp:'ネットワーク基盤を強化しました。',id_:'Infrastruktur jaringan telah diperkuat.'},
+{id:80,cat:'it',kanji:'不具合対応',furi:'ふぐあいたいおう',arti:'Troubleshooting / bug handling',jp:'不具合対応のため調査中です。',id_:'Sedang menyelidiki untuk troubleshooting.'},
+{id:81,cat:'it',kanji:'問合せ対応',furi:'といあわせたいおう',arti:'Menangani pertanyaan / helpdesk',jp:'ユーザーからの問合せ対応をします。',id_:'Menangani pertanyaan dari pengguna.'},
+{id:82,cat:'it',kanji:'情報システム',furi:'じょうほうしすてむ',arti:'Sistem informasi',jp:'情報システム部門に所属しています。',id_:'Saya berada di divisi sistem informasi.'},
+{id:83,cat:'it',kanji:'IT環境整備',furi:'あいてぃかんきょうせいび',arti:'Setup lingkungan IT',jp:'新入社員のIT環境整備をします。',id_:'Menyiapkan lingkungan IT untuk karyawan baru.'},
+{id:84,cat:'it',kanji:'内部統制',furi:'ないぶとうせい',arti:'Internal control / compliance',jp:'内部統制の強化が必要です。',id_:'Penguatan internal control diperlukan.'},
+{id:85,cat:'it',kanji:'リスク管理',furi:'りすくかんり',arti:'Risk management',jp:'リスク管理体制を見直します。',id_:'Meninjau kembali sistem manajemen risiko.'},
+{id:86,cat:'it',kanji:'構築',furi:'こうちく',arti:'Build / implementasi sistem',jp:'新しい環境を構築しました。',id_:'Lingkungan baru telah dibangun.'},
+{id:87,cat:'it',kanji:'保守',furi:'ほしゅ',arti:'Maintenance',jp:'サーバーの保守作業を行います。',id_:'Melakukan pekerjaan maintenance server.'},
+{id:88,cat:'it',kanji:'導入',furi:'どうにゅう',arti:'Implementasi / deploy',jp:'新ツールを導入する予定です。',id_:'Berencana mengimplementasikan tool baru.'},
+{id:89,cat:'it',kanji:'運用',furi:'うんよう',arti:'Operasional / operation',jp:'システムの運用を担当しています。',id_:'Saya bertanggung jawab atas operasional sistem.'},
+// SUPER PENTING
+{id:90,cat:'it',kanji:'管理',furi:'かんり',arti:'Manajemen / management',jp:'プロジェクトの管理をしています。',id_:'Saya mengelola proyek.'},
+{id:91,cat:'it',kanji:'対応',furi:'たいおう',arti:'Penanganan / response',jp:'緊急対応が必要です。',id_:'Diperlukan penanganan darurat.'},
+{id:92,cat:'it',kanji:'支援',furi:'しえん',arti:'Support / dukungan',jp:'技術支援を提供します。',id_:'Memberikan dukungan teknis.'},
+{id:93,cat:'it',kanji:'整備',furi:'せいび',arti:'Setup / menyiapkan',jp:'IT環境の整備を進めます。',id_:'Melanjutkan persiapan lingkungan IT.'},
+// SOUMU TAMBAHAN
+{id:94,cat:'soumu',kanji:'管理者',furi:'かんりしゃ',arti:'Administrator / penanggung jawab',jp:'システム管理者に連絡してください。',id_:'Hubungi administrator sistem.'},
+{id:95,cat:'soumu',kanji:'担当',furi:'たんとう',arti:'Person in charge / PIC',jp:'このプロジェクトの担当は誰ですか？',id_:'Siapa PIC proyek ini?'},
+{id:96,cat:'soumu',kanji:'報告',furi:'ほうこく',arti:'Laporan / melaporkan',jp:'進捗を上司に報告します。',id_:'Saya melaporkan perkembangan ke atasan.'},
+{id:97,cat:'soumu',kanji:'確認',furi:'かくにん',arti:'Konfirmasi / memeriksa',jp:'内容を確認してください。',id_:'Tolong periksa isinya.'},
+{id:98,cat:'soumu',kanji:'実施',furi:'じっし',arti:'Pelaksanaan / eksekusi',jp:'計画を実施します。',id_:'Melaksanakan rencana.'},
+{id:99,cat:'soumu',kanji:'計画',furi:'けいかく',arti:'Perencanaan / rencana',jp:'来月の計画を立てます。',id_:'Membuat rencana untuk bulan depan.'},
+{id:100,cat:'soumu',kanji:'改善',furi:'かいぜん',arti:'Perbaikan / improvement',jp:'業務の改善提案をしました。',id_:'Saya mengajukan proposal perbaikan proses kerja.'},
+{id:101,cat:'soumu',kanji:'推進',furi:'すいしん',arti:'Mendorong / promote / drive',jp:'DX推進プロジェクトに参加しています。',id_:'Saya terlibat dalam proyek promosi DX.'},
+{id:102,cat:'soumu',kanji:'企画',furi:'きかく',arti:'Planning / perencanaan',jp:'新サービスの企画を立てています。',id_:'Sedang menyusun rencana layanan baru.'},
+// FINANCE
+{id:103,cat:'finance',kanji:'財務',furi:'ざいむ',arti:'Finance / keuangan',jp:'財務部門に確認します。',id_:'Saya akan konfirmasi ke divisi keuangan.'},
+{id:104,cat:'finance',kanji:'経理',furi:'けいり',arti:'Accounting / akuntansi',jp:'経費精算は経理に提出します。',id_:'Klaim biaya diserahkan ke bagian akuntansi.'},
+{id:105,cat:'finance',kanji:'決算',furi:'けっさん',arti:'Closing keuangan / financial closing',jp:'今月末に決算があります。',id_:'Ada closing keuangan akhir bulan ini.'},
+{id:106,cat:'finance',kanji:'予算',furi:'よさん',arti:'Anggaran / budget',jp:'来年度の予算を編成します。',id_:'Menyusun anggaran untuk tahun depan.'},
+{id:107,cat:'finance',kanji:'税務申告',furi:'ぜいむしんこく',arti:'Pelaporan pajak',jp:'確定申告の時期です。',id_:'Ini adalah waktu pelaporan pajak.'},
+{id:108,cat:'finance',kanji:'資金繰り',furi:'しきんぐり',arti:'Cash flow manajemen',jp:'資金繰りを確認する必要があります。',id_:'Perlu memeriksa kondisi cash flow.'},
+{id:109,cat:'finance',kanji:'会計監査',furi:'かいけいかんさ',arti:'Audit keuangan',jp:'今年の会計監査が始まります。',id_:'Audit keuangan tahun ini akan dimulai.'},
+{id:110,cat:'finance',kanji:'固定資産管理',furi:'こていしさんかんり',arti:'Manajemen aset tetap',jp:'固定資産管理台帳を更新します。',id_:'Update daftar manajemen aset tetap.'},
+];
+
+// ── STATE ──
+let vocab = JSON.parse(localStorage.getItem('nichiele_v2') || 'null') || INITIAL;
+let nextId = Math.max(...vocab.map(v=>v.id), 0) + 1;
+let filterCat = 'all';
+let mode = 'table';
+let searchQ = '';
+let flashIdx = 0;
+let flashFlipped = false;
+let shuffled = false;
+let flashOrder = [];
+let collapsed = {};
+let pendingRows = [];
+
+function save() { localStorage.setItem('nichiele_v2', JSON.stringify(vocab)); }
+
+// ── PANEL TOGGLE ──
+function togglePanel(name) {
+  const body = document.getElementById('body'+name);
+  const tog  = document.getElementById('tog'+name);
+  const show = !body.classList.contains('show');
+  body.classList.toggle('show', show);
+  tog.classList.toggle('open', show);
+}
+
+// ── FILTER ──
+function filtered() {
+  let base = vocab.filter(v => {
+    const matchCat = filterCat==='all' || v.cat===filterCat;
+    const q = searchQ.toLowerCase();
+    const matchQ = !q ||
+      v.kanji.toLowerCase().includes(q) ||
+      (v.furi||'').toLowerCase().includes(q) ||
+      v.arti.toLowerCase().includes(q) ||
+      (v.jp||'').toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  return base;
+}
+
+function flashData() {
+  const base = filtered();
+  if (!shuffled) return base;
+  if (flashOrder.length !== base.length) {
+    flashOrder = [...base].sort(()=>Math.random()-.5);
+  }
+  return flashOrder;
+}
+
+// ── STATS ──
+function renderStats() {
+  const el = document.getElementById('statsBar');
+  const total = vocab.length;
+  el.innerHTML = `<div class="stat">Total: <b>${total} kata</b></div>` +
+    Object.keys(CATS).map(k=>{
+      const n = vocab.filter(v=>v.cat===k).length;
+      if (!n) return '';
+      return `<div class="stat" style="color:${CATS[k].color}">${CATS[k].label.split(' ').slice(0,2).join(' ')}: <b>${n}</b></div>`;
+    }).join('');
+}
+
+// ── FILTERS ──
+function renderFilters() {
+  const el = document.getElementById('filterBtns');
+  const all = [{k:'all',label:'✦ Semua'}, ...Object.entries(CATS).map(([k,v])=>({k,label:v.label}))];
+  el.innerHTML = all.map(({k,label})=>{
+    const color = k==='all'?'var(--blue)':CATS[k]?.color;
+    const active = filterCat===k;
+    const n = k==='all' ? vocab.length : vocab.filter(v=>v.cat===k).length;
+    if (k!=='all' && n===0) return '';
+    return `<button class="fbtn${active?' active':''}"
+      style="${active?`background:${color};color:#0f1117;`:''}"
+      onclick="setFilter('${k}')">${label}${k!=='all'?` (${n})`:''}</button>`;
+  }).join('');
+}
+
+function setFilter(k) {
+  filterCat=k; flashIdx=0; flashFlipped=false;
+  flashOrder=[]; renderAll();
+}
+function setMode(m) {
+  mode=m; flashIdx=0; flashFlipped=false; flashOrder=[];
+  ['table','card','flash'].forEach(x=>document.getElementById('m-'+x).classList.toggle('active',x===m));
+  renderMain();
+}
+
+// ── SEARCH ──
+document.getElementById('searchInput').addEventListener('input',e=>{
+  searchQ=e.target.value; renderMain();
+});
+
+// ── ADD SINGLE ──
+function addVocab() {
+  const kanji = document.getElementById('f-kanji').value.trim();
+  const furi  = document.getElementById('f-furi').value.trim();
+  const arti  = document.getElementById('f-arti').value.trim();
+  const cat   = document.getElementById('f-cat').value;
+  const jp    = document.getElementById('f-jp').value.trim();
+  const id_   = document.getElementById('f-id').value.trim();
+  const msg   = document.getElementById('formMsg');
+  if (!kanji||!arti||!cat) { msg.style.color='var(--red)'; msg.textContent='⚠ Kanji, arti, kategori wajib diisi!'; return; }
+  vocab.push({id:nextId++,cat,kanji,furi,arti,jp,id_});
+  save();
+  msg.style.color='var(--green)'; msg.textContent='✓ Ditambahkan!';
+  ['f-kanji','f-furi','f-arti','f-jp','f-id'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('f-cat').value='';
+  setTimeout(()=>{msg.textContent='';},2200);
+  showToast('✓ '+kanji+' ditambahkan!');
+  renderAll();
+}
+
+// ── DELETE ──
+function deleteVocab(id) {
+  if(!confirm('Hapus kata ini?')) return;
+  vocab=vocab.filter(v=>v.id!==id); save(); renderAll(); showToast('🗑 Kata dihapus');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ─────────────────────────────────────────────
+// ── BULK UPLOAD ──
+// ─────────────────────────────────────────────
+const TMPL_HEADERS = ['kanji','furigana','arti','kategori','contoh_jp','contoh_id'];
+const TMPL_SAMPLE  = [
+  ['就業時間','しゅうぎょうじかん','Jam kerja resmi','jam','就業時間は8時45分〜17時30分です。','Jam kerja pukul 08:45–17:30.'],
+  ['情報セキュリティ','じょうほうせきゅりてぃ','Keamanan informasi','it','情報セキュリティ対策を強化します。','Memperkuat langkah keamanan informasi.'],
+  ['賞与','しょうよ','Bonus','gaji','賞与は7月と12月に支給されます。','Bonus diberikan Juli & Desember.'],
+];
+
+function downloadTemplate(type) {
+  const ws_data = [TMPL_HEADERS, ...TMPL_SAMPLE];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  ws['!cols'] = [{wch:16},{wch:22},{wch:28},{wch:12},{wch:36},{wch:36}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Template');
+  if (type==='csv') {
+    const csv = XLSX.utils.sheet_to_csv(ws);
+    const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'template_kamus.csv'; a.click();
+  } else {
+    XLSX.writeFile(wb, 'template_kamus.xlsx');
+  }
+  showToast('⬇ Template didownload!');
+}
+
+function exportData(type) {
+  const ws_data = [TMPL_HEADERS, ...vocab.map(v=>[v.kanji,v.furi||'',v.arti,v.cat,v.jp||'',v.id_||''])];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  ws['!cols'] = [{wch:16},{wch:22},{wch:28},{wch:12},{wch:36},{wch:36}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Kosakata');
+  if (type==='csv') {
+    const csv = XLSX.utils.sheet_to_csv(ws);
+    const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='kamus_nichiele_export.csv'; a.click();
+  } else {
+    XLSX.writeFile(wb, 'kamus_nichiele_export.xlsx');
+  }
+  showToast('📤 Data diexport!');
+}
+
+function handleDrop(ev) {
+  ev.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag');
+  const file = ev.dataTransfer.files[0];
+  if (file) handleFile(file);
+}
+
+function handleFile(file) {
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      let rows;
+      if (ext==='csv') {
+        const text = e.target.result;
+        rows = parseCSV(text);
+      } else {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      }
+      previewRows(rows);
+    } catch(err) {
+      showToast('❌ Gagal membaca file: '+err.message);
+    }
+  };
+  if (ext==='csv') reader.readAsText(file, 'UTF-8');
+  else reader.readAsArrayBuffer(file);
+}
+
+function parseCSV(text) {
+  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.trim());
+  if (lines.length<2) return [];
+  const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
+  return lines.slice(1).map(line => {
+    const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g) || [];
+    const obj = {};
+    headers.forEach((h,i)=>{ obj[h] = (vals[i]||'').replace(/^"|"$/g,'').trim(); });
+    return obj;
+  });
+}
+
+function normalizeRow(row) {
+  // Accept variations in header names
+  const kanji   = row.kanji || row['漢字'] || '';
+  const furi    = row.furigana || row.furi || row['読み方'] || '';
+  const arti    = row.arti || row['arti (indonesia)'] || row['artiindonesia'] || '';
+  const cat     = (row.kategori || row.category || row.cat || 'custom').toLowerCase().trim();
+  const jp      = row.contoh_jp || row['contoh kalimat'] || row.jp || '';
+  const id_     = row.contoh_id || row['terjemahan'] || row.id || '';
+  return {kanji:kanji.trim(), furi:furi.trim(), arti:arti.trim(), cat, jp:jp.trim(), id_:id_.trim()};
+}
+
+function validateRow(r) {
+  const errors = [];
+  if (!r.kanji) errors.push('kanji kosong');
+  if (!r.arti)  errors.push('arti kosong');
+  if (!VALID_CATS.includes(r.cat)) errors.push(`kategori "${r.cat}" tidak valid`);
+  const dup = vocab.find(v=>v.kanji===r.kanji);
+  if (dup) errors.push('sudah ada di kamus');
+  return errors;
+}
+
+function previewRows(rawRows) {
+  pendingRows = rawRows.map(r=>normalizeRow(r)).filter(r=>r.kanji||r.arti);
+  const tbody = document.getElementById('previewBody');
+  const wrap  = document.getElementById('previewWrap');
+  const acts  = document.getElementById('importActions');
+  const count = document.getElementById('previewCount');
+
+  let validCount=0, errCount=0;
+  tbody.innerHTML = pendingRows.map((r,i)=>{
+    const errs = validateRow(r);
+    const isOk = errs.length===0;
+    if(isOk) validCount++; else errCount++;
+    return `<tr class="${isOk?'':'row-err'}">
+      <td>${i+1}</td>
+      <td>${r.kanji}</td>
+      <td>${r.furi||'—'}</td>
+      <td>${r.arti}</td>
+      <td>${r.cat}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.jp||'—'}</td>
+      <td>${isOk?`<span class="ok">✓ OK</span>`:`<span class="err">⚠ ${errs.join(', ')}</span>`}</td>
+    </tr>`;
+  }).join('');
+
+  count.innerHTML = `<span class="ok">${validCount} valid</span>&nbsp;&nbsp;${errCount>0?`<span class="err">${errCount} error</span>`:''}`;
+  wrap.classList.add('show');
+  acts.style.display = 'flex';
+  document.getElementById('btnImport').disabled = validCount===0;
+  document.getElementById('importMsg').textContent = '';
+}
+
+function importRows() {
+  let added=0, skipped=0;
+  pendingRows.forEach(r=>{
+    const errs=validateRow(r);
+    if(errs.length===0){ vocab.push({id:nextId++,...r}); added++; }
+    else skipped++;
+  });
+  save();
+  document.getElementById('importMsg').textContent = `✓ ${added} kata diimport, ${skipped} dilewati`;
+  document.getElementById('importMsg').style.color = 'var(--green)';
+  document.getElementById('btnImport').disabled=true;
+  showToast(`✓ ${added} kata berhasil diimport!`);
+  pendingRows=[];
+  setTimeout(()=>{ cancelPreview(); renderAll(); }, 1500);
+}
+
+function cancelPreview() {
+  document.getElementById('previewWrap').classList.remove('show');
+  document.getElementById('importActions').style.display='none';
+  document.getElementById('fileInput').value='';
+  pendingRows=[];
+}
+
+// ─────────────────────────────────────────────
+// ── RENDER ──
+// ─────────────────────────────────────────────
+function renderTable(data) {
+  const byCat={};
+  data.forEach(v=>{ if(!byCat[v.cat]) byCat[v.cat]=[]; byCat[v.cat].push(v); });
+  if(!Object.keys(byCat).length) return '<div class="empty">Tidak ada kata yang cocok 🔍</div>';
+  return Object.entries(byCat).map(([cat,items])=>{
+    const cfg=CATS[cat]||CATS.custom;
+    const coll=collapsed[cat];
+    return `<div class="category-block">
+      <div class="cat-header" onclick="toggleCollapse('${cat}')">
+        <span class="cat-badge" style="background:${cfg.color}">${cfg.label}</span>
+        <span class="cat-count">${items.length} kata</span>
+        <span class="cat-collapse">${coll?'▶ tampilkan':'▼ sembunyikan'}</span>
+      </div>
+      ${coll?'':` <table class="vocab-table">
+        <thead><tr>
+          <th style="width:125px">漢字</th>
+          <th style="width:115px">読み方</th>
+          <th>Arti</th><th>Contoh Kalimat</th>
+          <th style="width:32px"></th>
+        </tr></thead>
+        <tbody>${items.map(v=>`<tr>
+          <td><div class="td-kanji" style="color:${cfg.color}">${v.kanji}</div></td>
+          <td><div class="td-furi">${v.furi||'—'}</div></td>
+          <td><div class="td-arti">${v.arti}</div></td>
+          <td><div class="td-jp">${v.jp||'—'}</div>${v.id_?`<div class="td-id">${v.id_}</div>`:''}</td>
+          <td><button class="del-btn" onclick="deleteVocab(${v.id})">✕</button></td>
+        </tr>`).join('')}</tbody>
+      </table>`}
+    </div>`;
+  }).join('');
+}
+
+function toggleCollapse(cat){ collapsed[cat]=!collapsed[cat]; renderMain(); }
+
+function renderCards(data) {
+  if(!data.length) return '<div class="empty">Tidak ada kata yang cocok 🔍</div>';
+  return `<div class="cards-grid">${data.map(v=>{
+    const cfg=CATS[v.cat]||CATS.custom;
+    return `<div class="card" style="border-left:3px solid ${cfg.color}">
+      <button class="del-btn" onclick="deleteVocab(${v.id})">✕</button>
+      <div class="card-cat" style="color:${cfg.color}">${cfg.label}</div>
+      <div class="card-kanji" style="color:${cfg.color}">${v.kanji}</div>
+      <div class="card-furi">${v.furi||''}</div>
+      <div class="card-arti">${v.arti}</div>
+      ${v.jp?`<div class="card-jp">${v.jp}</div><div class="card-id">${v.id_||''}</div>`:''}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderFlash(data) {
+  if(!data.length) return '<div class="empty">Tidak ada kata yang cocok 🔍</div>';
+  const fdata = shuffled ? flashOrder.filter(v=>data.includes(v)) : data;
+  if(!fdata.length){ flashOrder=[...data].sort(()=>Math.random()-.5); return renderFlash(data); }
+  if(flashIdx>=fdata.length) flashIdx=0;
+  const v=fdata[flashIdx];
+  const cfg=CATS[v.cat]||CATS.custom;
+  return `<div class="flash-wrap">
+    <div class="flash-top">
+      <div class="flash-info">Kartu ${flashIdx+1} dari ${fdata.length}</div>
+      <button class="flash-shuffle${shuffled?' on':''}" onclick="toggleShuffle()">
+        🔀 Acak${shuffled?' (ON)':' (OFF)'}
+      </button>
+    </div>
+    <div class="flashcard${flashFlipped?' flipped':''}" onclick="flipCard()">
+      <div class="flash-inner">
+        <div class="flash-face">
+          <div class="flash-kanji" style="color:${cfg.color}">${v.kanji}</div>
+          <div class="flash-furi">${v.furi||''}</div>
+          <div class="flash-hint">Klik untuk lihat arti ↩</div>
+        </div>
+        <div class="flash-face flash-back">
+          <div class="flash-cat" style="color:${cfg.color}">${cfg.label}</div>
+          <div class="flash-arti">${v.arti}</div>
+          ${v.jp?`<div class="flash-jp">${v.jp}</div><div class="flash-id">${v.id_||''}</div>`:''}
+        </div>
+      </div>
+    </div>
+    <div class="flash-nav">
+      <button class="flash-btn" onclick="flashNav(-1)">← Prev</button>
+      <span class="flash-counter">${flashIdx+1} / ${fdata.length}</span>
+      <button class="flash-btn primary" onclick="flashNav(1)">Next →</button>
+    </div>
+  </div>`;
+}
+
+function toggleShuffle() {
+  shuffled=!shuffled;
+  if(shuffled){ const d=filtered(); flashOrder=[...d].sort(()=>Math.random()-.5); }
+  flashIdx=0; flashFlipped=false; renderMain();
+}
+function flipCard(){ flashFlipped=!flashFlipped; renderMain(); }
+function flashNav(dir) {
+  const d=filtered();
+  const fdata=shuffled?flashOrder.filter(v=>d.find(x=>x.id===v.id)):d;
+  flashIdx=(flashIdx+dir+fdata.length)%fdata.length;
+  flashFlipped=false; renderMain();
+}
+
+function renderMain() {
+  const data=filtered();
+  const el=document.getElementById('mainContent');
+  if(mode==='table') el.innerHTML=renderTable(data);
+  else if(mode==='card') el.innerHTML=renderCards(data);
+  else el.innerHTML=renderFlash(data);
+}
+
+function renderAll() { renderStats(); renderFilters(); renderMain(); }
+
+document.querySelectorAll('.finput').forEach(el=>{
+  el.addEventListener('keydown',e=>{ if(e.key==='Enter') addVocab(); });
+});
+
+renderAll();
+</script>
+</body>
+</html>
